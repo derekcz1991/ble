@@ -4,18 +4,30 @@ int sockfd;
 int port = 8089;
 //int port = 8080;
 
-char *ip = "158.182.246.221";
+char *ip = "";
 //char *ip = "158.182.246.224";
-char *host = "158.182.246.221:8089";
+
+char *host = "test.eyebb.com";
+//char *host = "srv.eyebb.com";
 //char *host = "158.182.246.224:8080";
+
 char *page = "/inpService/api/writeMacAddress";
 
 int setup_http_request()
 {
+	struct hostent* hostent;
 	struct sockaddr_in servaddr;
 	struct timeval timeout;
 	timeout.tv_sec = 5;
 	timeout.tv_usec = 0;
+
+	hostent = gethostbyname(host);
+	if(hostent == NULL) {
+		perror("Can't get host by hostname\n");  
+		return 0;
+	}
+
+	ip = inet_ntoa(*((struct in_addr*) hostent->h_addr));
 
 	if((sockfd=socket(AF_INET,SOCK_STREAM,IPPROTO_TCP))<0){
 		perror("Can't create TCP socket!\n");  

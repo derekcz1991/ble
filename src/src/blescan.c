@@ -124,13 +124,18 @@ int hciConfigure(int sock, struct hci_filter of)
 
 int parseData(le_advertising_info *info) 
 {
+	uint8_t evt_type = info->evt_type;
+	//printf("evt_type = %d\n", evt_type);
+	if(evt_type != 4) {
+		return FALSE;
+	}
 	uint8_t *data = info->data;
 	switch(data[1]) {
 		case EIR_NAME_SHORT:
 		case EIR_NAME_COMPLETE:
 			if(isMacaron(data) == TRUE) {
 				if(isNewMacaron(&info->bdaddr) == TRUE) {
-					//sleepBeacon(&info->bdaddr);
+					sleepBeacon(&info->bdaddr);
 					counter++;
 					p1 =  (struct MACARON_BLE_INFO *) malloc(MACARON_BLE_LEN);
 					// set uuid

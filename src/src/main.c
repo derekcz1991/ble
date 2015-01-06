@@ -145,7 +145,7 @@ void set_timer()
   itv.it_value.tv_sec = 3;    //timer start after 3 seconds later  
   itv.it_value.tv_usec = 0;  
   
-  itv.it_interval.tv_sec = 5;  
+  itv.it_interval.tv_sec = 10;  
   itv.it_interval.tv_usec = 0;  
     
   setitimer(ITIMER_REAL,&itv,NULL);  
@@ -153,8 +153,11 @@ void set_timer()
 
 void timer_handler()
 {
-  if(head != Null) {
+  if(debug == 0)
+  {
+    
     char *params = (char *) malloc(unit_length*counter + 100);
+    strcpy(params,"");
     strcat(params, major);
     strcat(params, "&");
     strcat(params, minor);
@@ -162,21 +165,22 @@ void timer_handler()
     strcat(params, uuid);
     strcat(params, "&listSenderInfo=");
     //strcat(params, "recMaj=2&recMin=2&recUuid=222&listSenderInfo=");
-    char rssi[4];
-    struct MACARON_BLE_INFO *p;
-    p = head;
-    int index = 0;
-    while(index < counter) {
-      strcat(params, p->addr);
-      strcat(params, ",");
-      myitoa(p->rssi, rssi, 10);
-      strcat(params, rssi);      
-      strcat(params, ";");
+    if(head != Null) {
+      char rssi[4];
+      struct MACARON_BLE_INFO *p;
+      p = head;
+      int index = 0;
+      while(index < counter) {
+        strcat(params, p->addr);
+        strcat(params, ",");
+        myitoa(p->rssi, rssi, 10);
+        strcat(params, rssi);      
+        strcat(params, ";");
 
-      p = p->next;
-      index++;
+        p = p->next;
+        index++;
+      }
     }
-
     int params_len = strlen(params);
     int block = (int)params_len/60;
     printf("\n******************************************************************\n");
@@ -202,16 +206,12 @@ void timer_handler()
     printf("******************************************************************\n");
     printf("                               ***\n");
     printf("                                *\n");
-    if(debug == 0)
-    {
-      if(process_post(params) >= 0) 
-      {
-        resetData();
-      }
-    }
     
+    if(process_post(params) >= 0) 
+    {
+      resetData();
+    }
   }
-  
 }
 
 char *myitoa(int num,char *str,int radix)
