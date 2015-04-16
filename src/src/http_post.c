@@ -1,7 +1,7 @@
 #include "http_post.h"
 
 int sockfd;
-int port = 8089;
+int port = 80;
 //int port = 8080;
 
 char *ip = "";

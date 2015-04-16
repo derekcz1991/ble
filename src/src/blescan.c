@@ -184,7 +184,7 @@ void sleepBeacon(const bdaddr_t *ba)
 	strcat(command_str, "gatttool -b ");
 	ba2str(ba, temp_str);
 	strcat(command_str, temp_str);
-	strcat(command_str, " --char-write-req --handle=0x001f --value=1000 &");
+	strcat(command_str, " --char-write-req --handle=0x001f --value=0a000000 &");
 	printf("\n%s\n", command_str);
 	system(command_str);
 }
