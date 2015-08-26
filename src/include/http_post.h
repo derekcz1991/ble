@@ -20,8 +20,8 @@
 #define MAXLINE 4096
 #define MAXSUB  200
 
-int setup_http_request();
+int setup_http_request(int isDebug);
 
-int process_post(char *params);
+int process_post(char *params, int isDebug);
 
 #endif

@@ -8,7 +8,7 @@ int unit_length = (4+17+2);
 char major[20];
 char minor[20];
 char uuid[20];
-int debug;
+int isDebug;
 
 int main(int argc,char **argv)
 {
@@ -27,7 +27,7 @@ int main(int argc,char **argv)
     if(strcmp(*++argv, "debug") == 0) 
     {
       printf("-----debug environment-----\n");
-      debug = 1;
+      isDebug = 1;
     }
   }
     
@@ -153,64 +153,59 @@ void set_timer()
 
 void timer_handler()
 {
-  if(debug == 0)
-  {
-    
-    char *params = (char *) malloc(unit_length*counter + 100);
-    strcpy(params,"");
-    strcat(params, major);
-    strcat(params, "&");
-    strcat(params, minor);
-    strcat(params, "&");
-    strcat(params, uuid);
-    strcat(params, "&listSenderInfo=");
-    //strcat(params, "recMaj=2&recMin=2&recUuid=222&listSenderInfo=");
-    if(head != Null) {
-      char rssi[4];
-      struct MACARON_BLE_INFO *p;
-      p = head;
-      int index = 0;
-      while(index < counter) {
-        strcat(params, p->addr);
-        strcat(params, ",");
-        myitoa(p->rssi, rssi, 10);
-        strcat(params, rssi);      
-        strcat(params, ";");
+  char *params = (char *) malloc(unit_length*counter + 100);
+  strcpy(params,"");
+  strcat(params, major);
+  strcat(params, "&");
+  strcat(params, minor);
+  strcat(params, "&");
+  strcat(params, uuid);
+  strcat(params, "&listSenderInfo=");
+  if(head != Null) {
+    char rssi[4];
+    struct MACARON_BLE_INFO *p;
+    p = head;
+    int index = 0;
+    while(index < counter) {
+      strcat(params, p->addr);
+      strcat(params, ",");
+      myitoa(p->rssi, rssi, 10);
+      strcat(params, rssi);      
+      strcat(params, ";");
 
-        p = p->next;
-        index++;
-      }
+      p = p->next;
+      index++;
     }
-    int params_len = strlen(params);
-    int block = (int)params_len/60;
-    printf("\n******************************************************************\n");
-    printf("*                       sending parameters...                    *\n");
-    int i,j;
-    for(i=0; i<=block; i++)
+  }
+  int params_len = strlen(params);
+  int block = (int)params_len/60;
+  printf("\n******************************************************************\n");
+  printf("*                       sending parameters...                    *\n");
+  int i,j;
+  for(i=0; i<=block; i++)
+  {
+    printf("*  ");
+    for(j=i*60; j<(i+1)*60 && j<params_len; j++)
     {
-      printf("*  ");
-      for(j=i*60; j<(i+1)*60 && j<params_len; j++)
-      {
-        printf("%c", params[j]);
-      }
-      if(j < (i+1)*60)
-      {
-        int k;
-        for(k=j; k<(i+1)*60; k++)
-        {
-          printf(" ");
-        }
-      }
-      printf("  *\n");
+      printf("%c", params[j]);
     }
-    printf("******************************************************************\n");
-    printf("                               ***\n");
-    printf("                                *\n");
-    
-    if(process_post(params) >= 0) 
+    if(j < (i+1)*60)
     {
-      resetData();
+      int k;
+      for(k=j; k<(i+1)*60; k++)
+      {
+        printf(" ");
+      }
     }
+    printf("  *\n");
+  }
+  printf("******************************************************************\n");
+  printf("                               ***\n");
+  printf("                                *\n");
+  
+  if(process_post(params, isDebug) >= 0) 
+  {
+    resetData();
   }
 }
 

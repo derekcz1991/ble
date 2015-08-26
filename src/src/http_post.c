@@ -1,19 +1,21 @@
 #include "http_post.h"
 
 int sockfd;
-int port = 80;
-//int port = 8080;
 
+int port;
 char *ip = "";
-//char *ip = "158.182.246.224";
+char *host = "";
 
-char *host = "test.eyebb.com";
-//char *host = "srv.eyebb.com";
-//char *host = "158.182.246.224:8080";
+
+char *test_host = "test.eyebb.com";
+int test_port = 80;
+
+char *production_host = "srv.eyebb.com";
+int production_port = 8080;
 
 char *page = "/inpService/api/writeMacAddress";
 
-int setup_http_request()
+int setup_http_request(int isDebug)
 {
 	struct hostent* hostent;
 	struct sockaddr_in servaddr;
@@ -21,6 +23,17 @@ int setup_http_request()
 	timeout.tv_sec = 5;
 	timeout.tv_usec = 0;
 
+	if(isDebug == 1)
+	{
+		// debug mode
+		port = test_port;
+		host = test_host;
+	}
+	else
+	{
+		port = production_port;
+		host = production_host;
+	}
 	hostent = gethostbyname(host);
 	if(hostent == NULL) {
 		perror("Can't get host by hostname\n");  
@@ -28,6 +41,7 @@ int setup_http_request()
 	}
 
 	ip = inet_ntoa(*((struct in_addr*) hostent->h_addr));
+	//printf("ip = %s\n", ip);
 
 	if((sockfd=socket(AF_INET,SOCK_STREAM,IPPROTO_TCP))<0){
 		perror("Can't create TCP socket!\n");  
@@ -66,9 +80,9 @@ int setup_http_request()
   return 1;
 }
 
-int process_post(char *params)
+int process_post(char *params, int isDebug)
 {
-	if(setup_http_request()) {
+	if(setup_http_request(isDebug)) {
 		//printf("setup http requet succeed\n");
 	} else {
 		printf("setup http requet failed\n");
@@ -89,7 +103,8 @@ int process_post(char *params)
 	printf("******************************************************************\n");
   printf("*                       receive parameters...                    *\n");
 	//while ((n = read(sockfd, recvline, MAXLINE)) > 0) {
-  if((n = read(sockfd, recvline, MAXLINE)) > 0) {
+  if((n = read(sockfd, recvline, MAXLINE)) > 0) 
+  {
 		recvline[n] = '\0';
 		printf("*       ");
 		int i, index;
